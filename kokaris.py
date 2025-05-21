@@ -68,20 +68,20 @@ class Block:
             board[row][col] = self.block_type
         return 0
 
-    def draw(self, screen, block_color):
-        for row_offset, col_offset in self.shape:
+    '''
+    ブロックこうかとん変更プログラム➀
+    '''
+    def draw(self, screen, block_images):
+        for row_offset, col_offset in self.shape:#降ってくるブロック(こうかとん)表示する
             row = self.row + row_offset
             col = self.col + col_offset
             if row > 1:
-                pygame.draw.rect(screen, (0, 0, 0),
-                                 Rect(BOARD_OFFSET_X + BLOCK_SIZE * col,
-                                      BOARD_OFFSET_Y + BLOCK_SIZE * (row - 2),
-                                      BLOCK_SIZE, BLOCK_SIZE))
-                pygame.draw.rect(screen, block_color[self.block_type],
-                                 Rect(BOARD_OFFSET_X + 2 + BLOCK_SIZE * col,
-                                      BOARD_OFFSET_Y + 2 + BLOCK_SIZE * (row - 2),
-                                      BLOCK_SIZE - 4, BLOCK_SIZE - 4))
-
+                screen.blit(block_images[self.block_type],
+                        (BOARD_OFFSET_X + BLOCK_SIZE * col,
+                         BOARD_OFFSET_Y + BLOCK_SIZE * (row - 2)))
+    '''
+    ブロックこうかとん変更プログラム➀ここまで
+    '''
 def initialize_game():
     board = [[0 for _ in range(MAX_COL + 2)] for _ in range(MAX_ROW + 3)]
     for col in range(MAX_COL + 2):
@@ -95,23 +95,43 @@ def initialize_game():
 
     return board, block
 
-def draw_board(screen, board, block_color):
+'''
+ブロックこうかとん変更プログラム➁
+'''
+def draw_board(screen, board, block_images):#着地後のブロック(こうかとん)を表示
     for row in range(2, MAX_ROW + 3):
         for col in range(MAX_COL + 2):
             pygame.draw.rect(screen, (0, 0, 0),
                              Rect(BOARD_OFFSET_X + BLOCK_SIZE * col,
                                   BOARD_OFFSET_Y + BLOCK_SIZE * (row - 2),
                                   BLOCK_SIZE, BLOCK_SIZE))
-            if 2 <= board[row][col] <= 8:
-                pygame.draw.rect(screen, block_color[board[row][col]],
-                                 Rect(BOARD_OFFSET_X + 2 + BLOCK_SIZE * col,
-                                      BOARD_OFFSET_Y + 2 + BLOCK_SIZE * (row - 2),
-                                      BLOCK_SIZE - 4, BLOCK_SIZE - 4))
+            block_type = board[row][col]
+            if 2 <= block_type <= 8:
+                screen.blit(block_images[block_type],
+                            (BOARD_OFFSET_X + BLOCK_SIZE * col,
+                             BOARD_OFFSET_Y + BLOCK_SIZE * (row - 2)))
+'''
+ブロックこうかとん変更プログラム➁ここまで
+'''
 
 def main():
     pygame.init()
     screen = pygame.display.set_mode((500, 750))
     pygame.display.set_caption("Simple Tetris")
+
+    '''
+    ブロックこうかとん追加プログラム➀
+    '''
+    block_images = [None, None]  # インデックス0,1は使わない
+
+    for i in range(2, 9):#2~8の数字を取得
+        image = pygame.image.load(f"ex5/fig/{i}.png").convert_alpha()#ファイルから数字に対応した画像を持ってくる。
+        image = pygame.transform.scale(image, (BLOCK_SIZE, BLOCK_SIZE))
+        block_images.append(image)
+
+    '''
+    ブロックこうかとん追加プログラム➀ここまで
+    '''
 
     block_color = [(50, 50, 50), (150, 150, 150), (255, 0, 0), (0, 0, 255), (255, 165, 0),
                    (255, 0, 255), (0, 255, 0), (0, 255, 255), (255, 255, 0)]
@@ -122,7 +142,7 @@ def main():
     while not game_over:
         pygame.time.wait(10)
         screen.fill((0, 0, 0))
-        draw_board(screen, board, block_color)
+        draw_board(screen, board, block_images)#block_imagesに変更
 
         if block:
             pressed_key = pygame.key.get_pressed()
@@ -139,7 +159,7 @@ def main():
                 else:
                     block_type = random.randint(2, 8)
                     block = Block(block_type)
-            block.draw(screen, block_color)
+            block.draw(screen, block_images)#block_imagesに変更
 
         pygame.display.update()
 
